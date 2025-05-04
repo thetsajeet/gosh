@@ -9,6 +9,7 @@ import (
 )
 
 const EXIT = "exit"
+const ECHO = "echo"
 
 func main() {
 	for {
@@ -34,6 +35,8 @@ func main() {
 				break
 			}
 			os.Exit(exitCode)
+		case ECHO:
+			fmt.Printf("%s\n", strings.Join(args, " "))
 		default:
 			fmt.Printf("%s: command not found\n", command)
 		}
