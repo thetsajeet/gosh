@@ -8,8 +8,17 @@ import (
 	"strings"
 )
 
-const EXIT = "exit"
-const ECHO = "echo"
+const (
+	EXIT = "exit"
+	ECHO = "echo"
+	TYPE = "type"
+)
+
+var BUILT_IN_TYPES = map[string]struct{}{
+	ECHO: {},
+	EXIT: {},
+	TYPE: {},
+} 
 
 func main() {
 	for {
@@ -35,8 +44,21 @@ func main() {
 				break
 			}
 			os.Exit(exitCode)
+
 		case ECHO:
 			fmt.Printf("%s\n", strings.Join(args, " "))
+
+		case TYPE:
+			if len(args) < 1 {
+				fmt.Printf("Exit code required as an arg: %v\n", args)
+				break
+			} 
+			if _, exists := BUILT_IN_TYPES[args[0]]; exists {
+				fmt.Printf("%s is a shell builtin\n", args[0])
+			} else {
+				fmt.Printf("%s: not found\n", args[0])
+			}
+
 		default:
 			fmt.Printf("%s: command not found\n", command)
 		}
