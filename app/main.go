@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -19,6 +20,21 @@ var BUILT_IN_TYPES = map[string]struct{}{
 	EXIT: {},
 	TYPE: {},
 } 
+
+func findExecutableFile(path, executableType string) error {
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		if executableType == f.Name() {
+			return nil
+		}
+	}
+
+	return errors.New("unable to find the file") 
+}
 
 func main() {
 	for {
@@ -50,15 +66,26 @@ func main() {
 
 		case TYPE:
 			if len(args) < 1 {
-				fmt.Printf("Exit code required as an arg: %v\n", args)
+				fmt.Printf("Require an arg to check type: %v\n", args)
 				break
 			} 
 			if _, exists := BUILT_IN_TYPES[args[0]]; exists {
 				fmt.Printf("%s is a shell builtin\n", args[0])
 			} else {
-				fmt.Printf("%s: not found\n", args[0])
-			}
+				PATH := os.Getenv("PATH")
+				foundFile := false
+				for p := range strings.SplitSeq(PATH, ":") {
+					if findExecutableFile(p, args[0]) == nil {
+						fmt.Printf("%s is %s\n", args[0], p + "/" + args[0])	
+						foundFile = true
+						break
+					}
+				}
+				if !foundFile {
+					fmt.Printf("%s: not found\n", args[0])
+				}
 
+			} 
 		default:
 			fmt.Printf("%s: command not found\n", command)
 		}
