@@ -14,12 +14,14 @@ const (
 	EXIT = "exit"
 	ECHO = "echo"
 	TYPE = "type"
+	PWD = "pwd"
 )
 
 var BUILT_IN_TYPES = map[string]struct{}{
 	ECHO: {},
 	EXIT: {},
 	TYPE: {},
+	PWD: {}, 
 } 
 
 var PATH = os.Getenv("PATH")
@@ -97,6 +99,13 @@ func main() {
 				}
 
 			} 
+		
+		case PWD:
+			pwd, err := os.Getwd()
+			if err != nil {
+				fmt.Printf("Something went wrong: %v", err)
+			}
+			fmt.Println(pwd)
 
 		default:
 			foundFile := false
