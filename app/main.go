@@ -15,6 +15,7 @@ const (
 	ECHO = "echo"
 	TYPE = "type"
 	PWD = "pwd"
+	CD = "cd"
 )
 
 var BUILT_IN_TYPES = map[string]struct{}{
@@ -22,6 +23,7 @@ var BUILT_IN_TYPES = map[string]struct{}{
 	EXIT: {},
 	TYPE: {},
 	PWD: {}, 
+	CD: {}, 
 } 
 
 var PATH = os.Getenv("PATH")
@@ -103,9 +105,20 @@ func main() {
 		case PWD:
 			pwd, err := os.Getwd()
 			if err != nil {
-				fmt.Printf("Something went wrong: %v", err)
+				fmt.Printf("Something went wrong: %v\n", err)
+				break
 			}
 			fmt.Println(pwd)
+
+		case CD:
+			if len(args) < 1 {
+				fmt.Printf("Missing args: %v\n", err)
+				break
+			}
+			if err := os.Chdir(args[0]); err != nil {
+				fmt.Printf("cd: %s: No such file or directory\n", args[0])
+				break
+			}
 
 		default:
 			foundFile := false
