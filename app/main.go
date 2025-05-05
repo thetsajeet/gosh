@@ -39,8 +39,8 @@ func findExecutableFile(path, executableType string) error {
 	return errors.New("unable to find the file") 
 }
 
-func runExecutableFile(path, command string,  args []string) {
-	cmd := exec.Command(path + "/" + command, args...)
+func runExecutableFile(command string,  args []string) {
+	cmd := exec.Command(command, args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("Unable to execute the command: %v", err)
@@ -102,7 +102,7 @@ func main() {
 			foundFile := false
 			for p := range strings.SplitSeq(PATH, ":") {
 					if findExecutableFile(p, command) == nil {
-						runExecutableFile(p, command, args)	
+						runExecutableFile(command, args)	
 						foundFile = true
 						break
 					}
