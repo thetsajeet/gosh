@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -21,6 +22,8 @@ var BUILT_IN_TYPES = map[string]struct{}{
 	TYPE: {},
 } 
 
+var PATH = os.Getenv("PATH")
+
 func findExecutableFile(path, executableType string) error {
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -34,6 +37,15 @@ func findExecutableFile(path, executableType string) error {
 	}
 
 	return errors.New("unable to find the file") 
+}
+
+func runExecutableFile(path string, args []string) {
+	cmd := exec.Command(path, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("Unable to execute the command: %v", err)
+	}
+	fmt.Println(output)
 }
 
 func main() {
@@ -72,7 +84,6 @@ func main() {
 			if _, exists := BUILT_IN_TYPES[args[0]]; exists {
 				fmt.Printf("%s is a shell builtin\n", args[0])
 			} else {
-				PATH := os.Getenv("PATH")
 				foundFile := false
 				for p := range strings.SplitSeq(PATH, ":") {
 					if findExecutableFile(p, args[0]) == nil {
@@ -86,8 +97,19 @@ func main() {
 				}
 
 			} 
+
 		default:
-			fmt.Printf("%s: command not found\n", command)
+			foundFile := false
+			for p := range strings.SplitSeq(PATH, ":") {
+					if findExecutableFile(p, command) == nil {
+						runExecutableFile(p, args)	
+						foundFile = true
+						break
+					}
+				}
+			if !foundFile {
+				fmt.Printf("%s: command not found\n", command)
+			}
 		}
 	}
 }
