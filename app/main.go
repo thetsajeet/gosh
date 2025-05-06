@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -52,6 +53,33 @@ func runExecutableFile(command string,  args []string) {
 	fmt.Print(string(output))
 }
 
+func extractCmdArgs(inputString string) (string, []string) {
+	var current strings.Builder
+	inSingleQuote := false
+	args := []string{}
+
+	for _, c := range inputString {
+
+		switch {
+			case c == '\'':
+				inSingleQuote = !inSingleQuote
+			case unicode.IsSpace(rune(c)) && !inSingleQuote:
+				if current.Len() > 0 {
+				args = append(args, current.String())
+				current.Reset()
+			}
+			default:
+				current.WriteRune(c)
+		}
+	}
+
+	if len(args) == 1 {
+		return args[0], []string{}
+	}
+
+	return args[0], args[1:]
+}
+
 func main() {
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
@@ -61,8 +89,7 @@ func main() {
 			fmt.Printf("Unable to read input command: %s\n", inputCommand)
 		}
 
-		inputCommandParts := strings.Fields(inputCommand)
-		command, args := inputCommandParts[0], inputCommandParts[1:]
+		command, args := extractCmdArgs(inputCommand)
 
 		switch command {
 		case EXIT:
