@@ -55,22 +55,41 @@ func runExecutableFile(command string,  args []string) {
 
 func extractCmdArgs(inputString string) (string, []string) {
 	var current strings.Builder
-	inSingleQuote := false
 	args := []string{}
+	inSingleQuote := false
+	inDoubleQuote := false
+	escaped := false
 
 	for _, c := range inputString {
 
 		switch {
-			case c == '\'':
-				inSingleQuote = !inSingleQuote
-			case unicode.IsSpace(rune(c)) && !inSingleQuote:
-				if current.Len() > 0 {
+		case escaped:
+			current.WriteRune(c)
+			escaped = false
+
+		case c == '\\':
+			escaped = true
+
+		case c == '\'' && !inDoubleQuote:
+			inSingleQuote = !inSingleQuote
+
+		case c == '"' && !inSingleQuote:
+			inDoubleQuote = !inDoubleQuote
+		
+		case unicode.IsSpace(c) && !inSingleQuote && !inDoubleQuote: 
+			if current.Len() > 0 {
 				args = append(args, current.String())
 				current.Reset()
 			}
-			default:
-				current.WriteRune(c)
+		
+		default:
+			current.WriteRune(c)
+		
 		}
+	}
+
+	if current.Len() > 0 {
+		args = append(args, current.String())
 	}
 
 	if len(args) == 1 {
