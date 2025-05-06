@@ -115,8 +115,18 @@ func main() {
 				fmt.Printf("Missing args: %v\n", err)
 				break
 			}
-			if err := os.Chdir(args[0]); err != nil {
-				fmt.Printf("cd: %s: No such file or directory\n", args[0])
+
+			dir := args[0]
+			if args[0] == "~" {
+				dir, err = os.UserHomeDir()
+				if err != nil {
+					fmt.Printf("Something went wrong: %v", err)
+					break
+				}
+			}
+			
+			if err := os.Chdir(dir); err != nil {
+				fmt.Printf("cd: %s: No such file or directory\n", dir)
 				break
 			}
 
