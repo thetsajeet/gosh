@@ -60,14 +60,17 @@ func extractCmdArgs(inputString string) (string, []string) {
 	inDoubleQuote := false
 	escaped := false
 
-	for _, c := range inputString {
+	for i, c := range inputString {
 
 		switch {
 		case escaped:
 			current.WriteRune(c)
 			escaped = false
 
-		case c == '\\' && !inDoubleQuote && !inSingleQuote:
+		case c == '\\' && !inSingleQuote && !inDoubleQuote:
+			escaped = true
+
+		case c == '\\' && inDoubleQuote && (i + 1 < len(inputString) && (inputString[i + 1] == '\\' || inputString[i + 1] == '$' || inputString[i + 1] == '"' || inputString[i + 1] == '\n')):
 			escaped = true
 
 		case c == '\'' && !inDoubleQuote:
