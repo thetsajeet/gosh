@@ -67,7 +67,7 @@ func extractCmdArgs(inputString string) (string, []string) {
 			current.WriteRune(c)
 			escaped = false
 
-		case c == '\\':
+		case c == '\\' && !inDoubleQuote && !inSingleQuote:
 			escaped = true
 
 		case c == '\'' && !inDoubleQuote:
